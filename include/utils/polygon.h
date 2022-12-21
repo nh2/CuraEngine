@@ -162,7 +162,7 @@ public:
         return ClipperLib::Orientation(*path);
     }
 
-    Polygons offset(int distance, ClipperLib::JoinType joinType = ClipperLib::jtMiter, double miter_limit = 1.2) const;
+    Polygons offset(int distance, ClipperLib::JoinType joinType = ClipperLib::jtRound, double miter_limit = 1.2) const;
 
     coord_t polygonLength() const
     {
@@ -1036,9 +1036,9 @@ public:
         return ret;
     }
 
-    Polygons offset(int distance, ClipperLib::JoinType joinType = ClipperLib::jtMiter, double miter_limit = 1.2) const;
+    Polygons offset(int distance, ClipperLib::JoinType joinType = ClipperLib::jtRound, double miter_limit = 1.2) const;
 
-    Polygons offsetPolyLine(int distance, ClipperLib::JoinType joinType = ClipperLib::jtMiter) const
+    Polygons offsetPolyLine(int distance, ClipperLib::JoinType joinType = ClipperLib::jtRound) const
     {
         Polygons ret;
         double miterLimit = 1.2;

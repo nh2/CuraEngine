@@ -29,6 +29,10 @@
 #include "utils/ThreadPool.h"
 #include "utils/math.h"
 
+
+#include "utils/SVG.h"
+
+
 namespace cura
 {
 
@@ -995,7 +999,10 @@ void AreaSupport::generateSupportAreasForMesh(SliceDataStorage& storage,
 
         if (extension_offset && ! is_support_mesh_place_holder)
         {
-            layer_this = layer_this.offset(extension_offset);
+            constexpr auto mu = 1.1;
+            auto support_plus_offset = layer_this.offset(extension_offset);
+            support_plus_offset = support_plus_offset.difference(storage.getLayerOutlines(layer_idx, no_support, no_prime_tower).offset(extension_offset * mu)); // <-- TODO: can this be + epsilon instead
+            layer_this = layer_this.unionPolygons(support_plus_offset);
         }
 
         if (use_towers && ! is_support_mesh_place_holder)
@@ -1016,7 +1023,25 @@ void AreaSupport::generateSupportAreasForMesh(SliceDataStorage& storage,
                 layer_above = &empty;
                 layer_this = layer_this.unionPolygons(storage.support.supportLayers[layer_idx].support_mesh);
             }
-            layer_this = AreaSupport::join(storage, *layer_above, layer_this, smoothing_distance).difference(model_mesh_on_layer);
+
+            if (layer_idx > 530 && layer_idx < 540)
+            {
+                AABB aabb(model_mesh_on_layer);
+                std::string name = std::string("C:/tmp_/") + std::to_string(layer_idx) + std::string(".svg");
+                SVG svg(name, aabb);
+                svg.writePolygons(layer_this, SVG::Color::ORANGE, 2.0);
+
+                layer_this = AreaSupport::join(storage, *layer_above, layer_this, smoothing_distance).difference(model_mesh_on_layer);
+
+                svg.writePolygons(model_mesh_on_layer, SVG::Color::BLACK);
+                svg.writePolygons(*layer_above, SVG::Color::GREEN, 2.0);
+                svg.writePolygons(layer_this, SVG::Color::MAGENTA);
+                svg.writePolygons(model_mesh_on_layer.offset(extension_offset * 1.1), SVG::Color::GRAY);
+            }
+            else
+            {
+                layer_this = AreaSupport::join(storage, *layer_above, layer_this, smoothing_distance).difference(model_mesh_on_layer);
+            }
         }
 
         // make towers for small support
@@ -1070,7 +1095,6 @@ void AreaSupport::generateSupportAreasForMesh(SliceDataStorage& storage,
             layer_this = layer_this.difference(xy_disallowed_per_layer[layer_idx]);
         }
     }
-
 
     // do stuff for when support on buildplate only
     if (support_type == ESupportType::PLATFORM_ONLY)
