@@ -995,7 +995,10 @@ void AreaSupport::generateSupportAreasForMesh(SliceDataStorage& storage,
 
         if (extension_offset && ! is_support_mesh_place_holder)
         {
-            layer_this = layer_this.offset(extension_offset);
+            constexpr coord_t epsilon = 5;
+            const auto offsetted_support_with_gaps_for_model =
+                layer_this.offset(extension_offset).difference(storage.getLayerOutlines(layer_idx, no_support, no_prime_tower).offset(extension_offset + epsilon));
+            layer_this = layer_this.unionPolygons(offsetted_support_with_gaps_for_model);
         }
 
         if (use_towers && ! is_support_mesh_place_holder)
