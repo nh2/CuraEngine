@@ -23,9 +23,9 @@ include(cmake/StandardProjectSettings.cmake)
 if (ENABLE_ARCUS)
     message(STATUS "Building with Arcus")
 
-    find_package(arcus 5.0.0 REQUIRED)
-    find_package(protobuf_BUILD 3.17.1 REQUIRED)  # Used for protoc
-    find_package(protobuf 3.17.1 REQUIRED)  # Used for linking
+    find_package(Arcus 5.0.0 REQUIRED)
+    # find_package(protobuf_BUILD 3.17.1 REQUIRED)  # Used for protoc
+    find_package(Protobuf 3.17.1 REQUIRED)  # Used for linking
     protobuf_generate_cpp(engine_PB_SRCS engine_PB_HEADERS Cura.proto)
 endif ()
 
@@ -193,15 +193,16 @@ if(ENABLE_OPENMP)
 endif()
 
 if(ENABLE_ARCUS)
-    target_link_libraries(_CuraEngine PRIVATE arcus::libarcus protobuf::libprotobuf)
+    target_link_libraries(_CuraEngine PRIVATE Arcus protobuf::libprotobuf)
 endif()
 
-find_package(clipper 6.4.2 REQUIRED)
-find_package(rapidjson 1.1.0 REQUIRED)
-find_package(stb 20200203 REQUIRED)
+find_package(Clipper 6.4.2 REQUIRED)
+find_package(RapidJSON 1.1.0 REQUIRED)
+find_package(Stb 20200203 REQUIRED)
 find_package(Boost 1.78.0 REQUIRED)
 
-target_link_libraries(_CuraEngine PRIVATE clipper::clipper rapidjson::rapidjson stb::stb boost::boost)
+target_include_directories(_CuraEngine PRIVATE RapidJSON ${Stb_INCLUDE_DIRS})
+target_link_libraries(_CuraEngine PRIVATE Clipper::Clipper Boost::boost)
 
 if (WIN32)
     message(STATUS "Using windres")
